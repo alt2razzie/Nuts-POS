@@ -1,21 +1,25 @@
-// --- CONFIGURATION (FILL THESE IN!) ---
-const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; 
+// ==========================================
+// 1. SUPABASE CONFIGURATION (UPDATE THESE!)
+// ==========================================
+const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
+const ADMIN_EMAIL = 'kuyabrill@gmail.com'; // <--- Change this to your admin email
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const ADMIN_EMAIL = 'kuyabrill@gmail.com'; 
-// --------------------------------------
-
+// State Variables
 let currentUser = null;
 let cart = [];
 
-// --- UI ROUTING ---
+// ==========================================
+// 2. NAVIGATION & UI STATE
+// ==========================================
 function navigate(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
     document.getElementById(pageId).classList.remove('hidden');
+    window.scrollTo(0, 0);
 }
 
-// --- AUTH STATE MANAGER ---
 async function updateUIBasedOnAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     
@@ -30,7 +34,6 @@ async function updateUIBasedOnAuth() {
         if(logoutBtn) logoutBtn.classList.remove('hidden');
         if(cartBtn) cartBtn.classList.remove('hidden');
         
-        // Show admin button if the logged-in email matches ADMIN_EMAIL
         if (currentUser.email === ADMIN_EMAIL && adminBtn) {
             adminBtn.classList.remove('hidden');
         }
@@ -41,6 +44,7 @@ async function updateUIBasedOnAuth() {
     } else {
         currentUser = null;
         cart = []; 
+        updateCartUI();
         if(loginBtn) loginBtn.classList.remove('hidden');
         if(logoutBtn) logoutBtn.classList.add('hidden');
         if(cartBtn) cartBtn.classList.add('hidden');
@@ -48,18 +52,26 @@ async function updateUIBasedOnAuth() {
     }
 }
 
-// --- OTP AUTH FLOW ---
+// ==========================================
+// 3. AUTHENTICATION (EMAIL OTP)
+// ==========================================
 async function requestOTP(e) {
     e.preventDefault();
     const email = document.getElementById('customer-email').value;
     const btn = document.getElementById('btn-request-otp');
-    btn.innerText = "Sending code..."; btn.disabled = true;
+    
+    btn.innerText = "Sending Secure Code...";
+    btn.disabled = true;
 
-    const { error } = await supabase.auth.signInWithOtp({ email: email });
+    const { error } = await supabase.auth.signInWithOtp({ 
+        email: email,
+        options: { shouldCreateUser: true }
+    });
 
     if (error) {
-        alert("Error: " + error.message);
-        btn.innerText = "Send Secure Code"; btn.disabled = false;
+        alert("Error sending code: " + error.message);
+        btn.innerText = "Send Secure Code";
+        btn.disabled = false;
     } else {
         document.getElementById('otp-request-form').classList.add('hidden');
         document.getElementById('otp-verify-form').classList.remove('hidden');
@@ -71,18 +83,25 @@ async function verifyOTP(e) {
     const email = document.getElementById('customer-email').value;
     const otp = document.getElementById('customer-otp').value;
     const btn = document.getElementById('btn-verify-otp');
-    btn.innerText = "Verifying..."; btn.disabled = true;
+    
+    btn.innerText = "Verifying Code...";
+    btn.disabled = true;
 
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: 'email' });
+    const { error } = await supabase.auth.verifyOtp({ 
+        email: email, 
+        token: otp, 
+        type: 'email' 
+    });
 
     if (error) {
-        alert("Invalid code.");
-        btn.innerText = "Verify & Enter Shop"; btn.disabled = false;
+        alert("Invalid or expired code. Please try again.");
+        btn.innerText = "Verify & Enter Shop";
+        btn.disabled = false;
     } else {
-        alert("Welcome!");
-        updateUIBasedOnAuth();
+        alert("Welcome to Nini Nuts!");
+        await updateUIBasedOnAuth();
         navigate('shop');
-        loadProducts(); // Reload to activate "Add to cart" buttons
+        loadProducts(); // Reloads products to show "Add to Cart" buttons
     }
 }
 
@@ -96,29 +115,41 @@ function resetAuthForm() {
 
 async function logoutUser() {
     await supabase.auth.signOut();
-    updateUIBasedOnAuth();
+    alert("You have been successfully logged out.");
+    await updateUIBasedOnAuth();
     navigate('shop');
-    loadProducts(); // Reload to deactivate "Add to cart" buttons
+    loadProducts(); 
 }
 
-// --- FETCH & DISPLAY PRODUCTS ---
+// ==========================================
+// 4. SHOP & DATABASE FETCHING
+// ==========================================
 async function loadProducts(categoryFilter = 'All') {
     const list = document.getElementById('product-list');
-    if(!list) return; // Only run on index.html
+    if(!list) return; // Prevents errors if loaded on admin page
 
-    list.innerHTML = '<p style="text-align:center; width:100%;">Loading sweet treats...</p>';
+    list.innerHTML = '<p style="text-align: center; width: 100%;">Loading sweet treats from the database...</p>';
 
     let query = supabase.from('products').select('*').order('created_at', { ascending: false });
-    if (categoryFilter !== 'All') query = query.eq('category', categoryFilter);
+    if (categoryFilter !== 'All') {
+        query = query.eq('category', categoryFilter);
+    }
 
     const { data, error } = await query;
 
     if (error) {
-        list.innerHTML = '<p style="color:red;">Error loading products.</p>';
+        list.innerHTML = '<p style="color: red; text-align: center; width: 100%;">Failed to load products. Check your database connection.</p>';
+        console.error(error);
         return;
     }
 
     list.innerHTML = '';
+    
+    if(data.length === 0) {
+        list.innerHTML = '<p style="text-align: center; width: 100%;">No products found. Time to upload some treats!</p>';
+        return;
+    }
+
     data.forEach(p => {
         const btnHtml = currentUser 
             ? `<button class="btn-add" onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>`
@@ -136,77 +167,102 @@ async function loadProducts(categoryFilter = 'All') {
     });
 }
 
-// --- ADMIN UPLOAD FUNCTION ---
-async function uploadProduct(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-upload');
-    btn.innerText = "Uploading..."; btn.disabled = true;
-
-    const name = document.getElementById('p-name').value;
-    const category = document.getElementById('p-category').value;
-    const price = document.getElementById('p-price').value;
-    const file = document.getElementById('p-image').files[0];
-
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    
-    // 1. Upload Image
-    const { error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file);
-    if (uploadError) {
-        alert("Image upload failed: " + uploadError.message);
-        btn.innerText = "Upload to Database"; btn.disabled = false; return;
-    }
-
-    // 2. Get Public URL
-    const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
-
-    // 3. Insert Database Row
-    const { error: dbError } = await supabase.from('products').insert([
-        { name, category, price, image_url: publicUrl }
-    ]);
-
-    if (dbError) {
-        alert("Database error: " + dbError.message);
-    } else {
-        alert("Product added successfully!");
-        e.target.reset();
-    }
-    btn.innerText = "Upload to Database"; btn.disabled = false;
-}
-
-// --- CART LOGIC ---
+// ==========================================
+// 5. CART LOGIC
+// ==========================================
 function addToCart(name, price) {
     cart.push({ name, price });
     updateCartUI();
-    alert(`${name} added to cart!`);
+    alert(`${name} added to your cart!`);
 }
 
 function updateCartUI() {
     const cartItemsDiv = document.getElementById('cart-items');
+    if(!cartItemsDiv) return;
+
     let total = 0;
+    cartItemsDiv.innerHTML = '';
     
     if (cart.length === 0) {
-        cartItemsDiv.innerHTML = '<p>Your cart is empty.</p>';
+        cartItemsDiv.innerHTML = '<p style="color: #888; text-align: center;">Your cart is feeling a bit empty.</p>';
     } else {
-        cartItemsDiv.innerHTML = '';
         cart.forEach((item, index) => {
             total += item.price;
             cartItemsDiv.innerHTML += `
-                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                <div class="cart-item">
                     <span>${item.name}</span>
-                    <span>₱${item.price.toFixed(2)} <button onclick="removeFromCart(${index})" style="background:#ffb6c1; border:none; color:white; cursor:pointer;">X</button></span>
+                    <span>₱${item.price.toFixed(2)} <button onclick="removeFromCart(${index})">X</button></span>
                 </div>
             `;
         });
     }
     
     document.getElementById('nav-cart-total').innerText = total.toFixed(2);
-    if(document.getElementById('cart-page-total')) document.getElementById('cart-page-total').innerText = total.toFixed(2);
+    document.getElementById('cart-page-total').innerText = total.toFixed(2);
 }
 
-function removeFromCart(index) { cart.splice(index, 1); updateCartUI(); }
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartUI();
+}
 
-// --- INITIALIZE ON LOAD ---
+// ==========================================
+// 6. ADMIN DATABASE UPLOAD
+// ==========================================
+async function uploadProduct(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-upload');
+    
+    const name = document.getElementById('p-name').value;
+    const category = document.getElementById('p-category').value;
+    const price = document.getElementById('p-price').value;
+    const fileInput = document.getElementById('p-image');
+    
+    if (fileInput.files.length === 0) return alert("Please select an image.");
+    const file = fileInput.files[0];
+
+    btn.innerText = "Uploading to Cloud...";
+    btn.disabled = true;
+
+    // A. Upload Image to Supabase Storage
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+    if (uploadError) {
+        alert("Image upload failed: " + uploadError.message);
+        btn.innerText = "Upload to Database"; 
+        btn.disabled = false; 
+        return;
+    }
+
+    // B. Get Public URL for the image
+    const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+    // C. Insert Data into Database
+    const { error: dbError } = await supabase.from('products').insert([
+        { name: name, category: category, price: parseFloat(price), image_url: publicUrl }
+    ]);
+
+    if (dbError) {
+        alert("Database error: " + dbError.message);
+    } else {
+        alert("Product added successfully!");
+        e.target.reset(); // Clear the form
+    }
+    
+    btn.innerText = "Upload to Database"; 
+    btn.disabled = false;
+}
+
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    updateUIBasedOnAuth().then(() => loadProducts());
+    updateUIBasedOnAuth().then(() => {
+        loadProducts();
+    });
 });
