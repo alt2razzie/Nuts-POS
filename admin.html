@@ -44,7 +44,7 @@
 
     async function secureAdminPage() {
         // 1. Ensure user is logged in
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         
         if (!session) {
             alert("Security Alert: You are not logged in.");
