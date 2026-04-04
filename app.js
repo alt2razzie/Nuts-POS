@@ -3,7 +3,7 @@
 // ==========================================
 const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
-const ADMIN_EMAIL = 'kuyabrill@gmail.com'; // <--- Change this to your admin email
+const ADMIN_EMAIL = 'macmacgonzaga43@gmail.com'; // <--- Change this to your admin email
 
 // FIX: Renamed from 'supabase' to 'supabaseClient'
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -81,7 +81,8 @@ async function requestOTP(e) {
 
 async function verifyOTP(e) {
     e.preventDefault();
-    // .trim() removes accidental spaces if they copy/pasted badly
+    
+    // .trim() prevents errors if someone accidentally copies an invisible space
     const email = document.getElementById('customer-email').value.trim();
     const otp = document.getElementById('customer-otp').value.trim(); 
     const btn = document.getElementById('btn-verify-otp');
@@ -89,26 +90,16 @@ async function verifyOTP(e) {
     btn.innerText = "Verifying Code...";
     btn.disabled = true;
 
-    console.log("Attempting to verify OTP for:", email);
+    // Supabase v2 uses type: 'email' for ALL 6-digit email codes (both signup and login)
+    const { error } = await supabaseClient.auth.verifyOtp({ 
+        email: email, 
+        token: otp, 
+        type: 'email' 
+    });
 
-    // Try 1: Standard Email Login
-    let res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'email' });
-    
-    // Try 2: First-Time Signup
-    if (res.error) {
-        console.log("Standard login failed, trying 'signup' code...");
-        res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'signup' });
-    }
-    
-    // Try 3: Magic Link fallback
-    if (res.error) {
-        console.log("Signup login failed, trying 'magiclink' code...");
-        res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'magiclink' });
-    }
-
-    if (res.error) {
-        console.error("All OTP verification attempts failed:", res.error);
-        alert("Invalid or expired code. Please click 'Use a different email' to start over and request a fresh code.");
+    if (error) {
+        // This will now show the REAL error (e.g., "Invalid code" or "Expired")
+        alert("Error: " + error.message);
         btn.innerText = "Verify & Enter Shop";
         btn.disabled = false;
     } else {
