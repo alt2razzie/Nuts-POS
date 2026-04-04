@@ -88,11 +88,26 @@ async function verifyOTP(e) {
     btn.innerText = "Verifying Code...";
     btn.disabled = true;
 
-    const { error } = await supabaseClient.auth.verifyOtp({ 
-        email: email, 
-        token: otp, 
-        type: 'email' 
+    // 1. Try standard OTP
+    let { error } = await supabaseClient.auth.verifyOtp({ 
+        email: email, token: otp, type: 'email' 
     });
+
+    // 2. If standard fails, try First-Time Signup OTP
+    if (error) {
+        const res = await supabaseClient.auth.verifyOtp({ 
+            email: email, token: otp, type: 'signup' 
+        });
+        error = res.error;
+    }
+
+    // 3. If that fails, try Magic Link OTP
+    if (error) {
+        const res2 = await supabaseClient.auth.verifyOtp({ 
+            email: email, token: otp, type: 'magiclink' 
+        });
+        error = res2.error;
+    }
 
     if (error) {
         alert("Invalid or expired code. Please try again.");
