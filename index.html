@@ -17,9 +17,9 @@
     <nav id="main-nav">
         <button onclick="navigate('shop')">Shop</button>
         <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">Cart (₱<span id="nav-cart-total">0</span>)</button>
-        <button id="nav-login-btn" onclick="navigate('auth')">Login / Register</button>
+        <button id="nav-login-btn" onclick="navigate('auth')">Login</button>
         <button id="nav-logout-btn" onclick="logoutUser()" class="hidden">Logout</button>
-        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: #ffe4e1;">Admin</button>
+        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: #ff69b4; background: white; padding: 5px 15px; border-radius: 15px;">Admin</button>
     </nav>
 </header>
 
@@ -33,8 +33,7 @@
             <button onclick="loadProducts('Mixes')">Mixes</button>
         </div>
         <div class="grid" id="product-list">
-            <p style="text-align: center; width: 100%;">Loading sweet treats...</p>
-        </div>
+            </div>
     </div>
 
     <div id="auth" class="page hidden">
@@ -42,25 +41,29 @@
             <h2 style="color: #ff69b4;">Welcome to Nini Nuts!</h2>
             
             <form id="otp-request-form" onsubmit="requestOTP(event)">
-                <p style="color: #888; font-size: 0.9rem;">Enter your email to log in or create an account.</p>
-                <input type="email" id="customer-email" placeholder="Email address" required>
+                <p style="color: #888; font-size: 0.9rem;">Enter your email to log in or create a new account.</p>
+                <input type="email" id="customer-email" placeholder="Email Address" required>
                 <button type="submit" id="btn-request-otp" class="btn-primary">Send Secure Code</button>
             </form>
 
             <form id="otp-verify-form" class="hidden" onsubmit="verifyOTP(event)">
                 <p style="color: #2c7a3f; font-weight: bold;">Code sent! Check your email.</p>
-                <input type="text" id="customer-otp" placeholder="6-digit code" required maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+                <input type="text" id="customer-otp" placeholder="6-Digit Code" required pattern="[0-9]{6}" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 3px;">
                 <button type="submit" id="btn-verify-otp" class="btn-primary">Verify & Enter Shop</button>
-                <button type="button" onclick="resetAuthForm()" style="background:none; border:none; color:#ff69b4; cursor:pointer; text-decoration:underline;">Change email</button>
+                <button type="button" onclick="resetAuthForm()" style="background: none; border: none; color: #ff69b4; margin-top: 1rem; cursor: pointer; text-decoration: underline;">Use a different email</button>
             </form>
         </div>
     </div>
 
     <div id="cart" class="page hidden">
-        <h2 style="color: #ff69b4;">Your Nutty Cart</h2>
-        <div id="cart-items" style="background: white; padding: 1rem; border-radius: 15px; border: 2px solid #ffe4e1;"></div>
-        <div style="text-align: right; font-size: 1.5rem; font-weight: bold; color: #ff69b4; margin-top: 1rem;">
+        <h2 style="color: #ff69b4; text-align: center;">Your Nutty Cart</h2>
+        <div id="cart-items" style="background: white; padding: 1rem; border-radius: 15px; border: 2px solid #ffe4e1; max-width: 600px; margin: 0 auto;"></div>
+        
+        <div style="text-align: right; font-size: 1.5rem; font-weight: bold; color: #ff69b4; max-width: 600px; margin: 1rem auto 0 auto;">
             Total: ₱<span id="cart-page-total">0</span>
+        </div>
+        <div style="text-align: right; max-width: 600px; margin: 1rem auto;">
+             <button class="btn-primary" style="width: auto;">Proceed to Checkout</button>
         </div>
     </div>
 
