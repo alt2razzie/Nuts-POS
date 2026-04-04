@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nini Nuts - Admin</title>
+    <title>Nini Nuts - Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -16,40 +16,52 @@
 <div class="container hidden" id="admin-content">
     <form onsubmit="uploadProduct(event)">
         <h3 style="color: #87ceeb; text-align: center; margin-top: 0;">Add New Product</h3>
-        <input type="text" id="p-name" placeholder="Product Name" required>
+        
+        <label style="font-weight: bold; color: #888; font-size: 0.9rem;">Product Name</label>
+        <input type="text" id="p-name" placeholder="e.g., Spicy Cashews" required>
+        
+        <label style="font-weight: bold; color: #888; font-size: 0.9rem;">Category</label>
         <select id="p-category" required>
             <option value="Nuts">Nuts</option>
             <option value="Dried Fruits">Dried Fruits</option>
             <option value="Mixes">Mixes</option>
         </select>
-        <input type="number" id="p-price" placeholder="Price (₱)" required min="1">
-        <input type="file" id="p-image" accept="image/*" required>
-        <button type="submit" class="btn-primary" style="background:#87ceeb;" id="btn-upload">Upload to Database</button>
+        
+        <label style="font-weight: bold; color: #888; font-size: 0.9rem;">Price (₱)</label>
+        <input type="number" id="p-price" placeholder="e.g., 250" required min="1" step="0.01">
+        
+        <label style="font-weight: bold; color: #888; font-size: 0.9rem;">Product Image</label>
+        <input type="file" id="p-image" accept="image/*" required style="border: none; padding: 0;">
+        
+        <button type="submit" class="btn-primary" id="btn-upload" style="background:#87ceeb; margin-top: 1rem;">Upload to Database</button>
     </form>
 </div>
 
 <script src="app.js"></script>
+
 <script>
-    // 1. SET YOUR SECRET PASSCODE HERE
-    const UI_PASSCODE = "pastelnuts2026";
+    const UI_PASSCODE = "pastelnuts2026"; // Feel free to change this
 
     async function secureAdminPage() {
+        // 1. Ensure user is logged in
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-            alert("Not logged in.");
+            alert("Security Alert: You are not logged in.");
             window.location.href = 'index.html';
             return;
         }
 
-        // The ADMIN_EMAIL variable is pulled from app.js
+        // 2. Ensure user matches the ADMIN_EMAIL from app.js
         if (session.user.email !== ADMIN_EMAIL) {
-            alert("Unauthorized. Only the boss can access this.");
+            alert("Security Alert: Unauthorized account. Redirecting.");
             window.location.href = 'index.html';
             return;
         }
 
-        const passcode = prompt("Enter the Admin Passcode:");
+        // 3. Prompt for UI Passcode
+        const passcode = prompt("Enter the Admin Passcode to unlock the dashboard:");
+        
         if (passcode === UI_PASSCODE) {
             document.getElementById('admin-content').classList.remove('hidden');
         } else {
@@ -58,6 +70,7 @@
         }
     }
 
+    // Execute security check on load
     secureAdminPage();
 </script>
 </body>
