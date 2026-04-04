@@ -1,18 +1,14 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     background-color: #fff0f5; /* Lavender Blush */
     color: #5c5c5c;
 }
 header {
     background-color: #ffb6c1; /* Light Pink */
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
+    padding: 1rem 2rem; display: flex;
+    justify-content: space-between; align-items: center;
+    color: white; box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
 }
 .logo { font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
 .tagline { font-size: 0.8rem; font-weight: normal; }
@@ -28,7 +24,7 @@ nav button:hover { color: #ffe4e1; }
     padding: 0.5rem 1.5rem; cursor: pointer; border: none; border-radius: 20px;
     background-color: #ffe4e1; font-weight: bold; color: #ff69b4; transition: 0.3s;
 }
-.tabs button:hover { background-color: #ffc0cb; }
+.tabs button:hover { background-color: #ffc0cb; color: white; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
 .card {
     background: white; border: 2px solid #ffe4e1; padding: 1.5rem;
@@ -44,6 +40,6 @@ nav button:hover { color: #ffe4e1; }
     cursor: pointer; border-radius: 20px; font-size: 1rem; width: 100%; font-weight: bold; transition: 0.3s;
 }
 .btn-add:hover, .btn-primary:hover { background: #87ceeb; color: white; }
-form { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+form { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin: 0 auto; background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 input, select { padding: 0.8rem; border: 2px solid #ffe4e1; border-radius: 10px; font-size: 1rem; outline: none; }
 input:focus { border-color: #ffb6c1; }
