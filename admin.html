@@ -2,43 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nini Nuts - Admin</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-
-<header style="background-color: #87ceeb;">
-    <div class="logo">ADMIN DASHBOARD</div>
-    <nav><button onclick="logout()">Logout & Exit</button></nav>
+<body style="background-color: #f0f8ff;"> <header style="background-color: #87ceeb;"> <div class="logo">ADMIN DASHBOARD</div>
+    <nav>
+        <button onclick="window.location.href='index.html'">Back to Shop</button>
+    </nav>
 </header>
 
-<div class="container">
+<div class="container hidden" id="admin-content">
     <form onsubmit="uploadProduct(event)">
-        <h3 style="color: #87ceeb;">Add New Product</h3>
+        <h3 style="color: #87ceeb; text-align: center; margin-top: 0;">Add New Product</h3>
         <input type="text" id="p-name" placeholder="Product Name" required>
         <select id="p-category" required>
             <option value="Nuts">Nuts</option>
             <option value="Dried Fruits">Dried Fruits</option>
             <option value="Mixes">Mixes</option>
         </select>
-        <input type="number" id="p-price" placeholder="Price (₱)" required>
+        <input type="number" id="p-price" placeholder="Price (₱)" required min="1">
         <input type="file" id="p-image" accept="image/*" required>
-        <button type="submit" class="btn-primary" style="background:#87ceeb;">Upload to Database</button>
+        <button type="submit" class="btn-primary" style="background:#87ceeb;" id="btn-upload">Upload to Database</button>
     </form>
 </div>
 
 <script src="app.js"></script>
 <script>
-    // Guard Clause: Run immediately to secure the page
-    async function checkAdmin() {
+    // 1. SET YOUR SECRET PASSCODE HERE
+    const UI_PASSCODE = "pastelnuts2026";
+
+    async function secureAdminPage() {
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (!session) {
-            alert("Unauthorized access. Redirecting.");
+            alert("Not logged in.");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // The ADMIN_EMAIL variable is pulled from app.js
+        if (session.user.email !== ADMIN_EMAIL) {
+            alert("Unauthorized. Only the boss can access this.");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const passcode = prompt("Enter the Admin Passcode:");
+        if (passcode === UI_PASSCODE) {
+            document.getElementById('admin-content').classList.remove('hidden');
+        } else {
+            alert("Incorrect passcode.");
             window.location.href = 'index.html';
         }
     }
-    checkAdmin();
+
+    secureAdminPage();
 </script>
 </body>
 </html>
