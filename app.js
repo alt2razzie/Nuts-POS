@@ -1,9 +1,9 @@
 // ==========================================
 // 1. SUPABASE CONFIGURATION (UPDATE THESE!)
 // ==========================================
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'; // <--- Change this
-const SUPABASE_KEY = 'YOUR_ANON_KEY'; // <--- Change this
-const ADMIN_EMAIL = 'your.email@gmail.com'; // <--- Change this to your admin email
+const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
+const ADMIN_EMAIL = 'kuyabrill@gmail.com'; // <--- Change this to your admin email
 
 // FIX: Renamed from 'supabase' to 'supabaseClient'
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
