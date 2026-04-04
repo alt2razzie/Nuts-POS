@@ -81,36 +81,34 @@ async function requestOTP(e) {
 
 async function verifyOTP(e) {
     e.preventDefault();
-    const email = document.getElementById('customer-email').value;
-    const otp = document.getElementById('customer-otp').value;
+    // .trim() removes accidental spaces if they copy/pasted badly
+    const email = document.getElementById('customer-email').value.trim();
+    const otp = document.getElementById('customer-otp').value.trim(); 
     const btn = document.getElementById('btn-verify-otp');
     
     btn.innerText = "Verifying Code...";
     btn.disabled = true;
 
-    // 1. Try standard OTP
-    let { error } = await supabaseClient.auth.verifyOtp({ 
-        email: email, token: otp, type: 'email' 
-    });
+    console.log("Attempting to verify OTP for:", email);
 
-    // 2. If standard fails, try First-Time Signup OTP
-    if (error) {
-        const res = await supabaseClient.auth.verifyOtp({ 
-            email: email, token: otp, type: 'signup' 
-        });
-        error = res.error;
+    // Try 1: Standard Email Login
+    let res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'email' });
+    
+    // Try 2: First-Time Signup
+    if (res.error) {
+        console.log("Standard login failed, trying 'signup' code...");
+        res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'signup' });
+    }
+    
+    // Try 3: Magic Link fallback
+    if (res.error) {
+        console.log("Signup login failed, trying 'magiclink' code...");
+        res = await supabaseClient.auth.verifyOtp({ email: email, token: otp, type: 'magiclink' });
     }
 
-    // 3. If that fails, try Magic Link OTP
-    if (error) {
-        const res2 = await supabaseClient.auth.verifyOtp({ 
-            email: email, token: otp, type: 'magiclink' 
-        });
-        error = res2.error;
-    }
-
-    if (error) {
-        alert("Invalid or expired code. Please try again.");
+    if (res.error) {
+        console.error("All OTP verification attempts failed:", res.error);
+        alert("Invalid or expired code. Please click 'Use a different email' to start over and request a fresh code.");
         btn.innerText = "Verify & Enter Shop";
         btn.disabled = false;
     } else {
