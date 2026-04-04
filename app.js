@@ -1,11 +1,12 @@
 // ==========================================
 // 1. SUPABASE CONFIGURATION (UPDATE THESE!)
 // ==========================================
-const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
-const ADMIN_EMAIL = 'kuyabrill@gmail.com'; // <--- Change this to your admin email
+const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Put your URL here
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Put your KEY here
+const ADMIN_EMAIL = 'kuyabrill@gmail.com'; // <--- Put your Admin Email here
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// FIX: Renamed from 'supabase' to 'supabaseClient' to prevent browser errors!
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // State Variables
 let currentUser = null;
@@ -21,7 +22,7 @@ function navigate(pageId) {
 }
 
 async function updateUIBasedOnAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     
     const loginBtn = document.getElementById('nav-login-btn');
     const logoutBtn = document.getElementById('nav-logout-btn');
@@ -63,7 +64,7 @@ async function requestOTP(e) {
     btn.innerText = "Sending Secure Code...";
     btn.disabled = true;
 
-    const { error } = await supabase.auth.signInWithOtp({ 
+    const { error } = await supabaseClient.auth.signInWithOtp({ 
         email: email,
         options: { shouldCreateUser: true }
     });
@@ -87,7 +88,7 @@ async function verifyOTP(e) {
     btn.innerText = "Verifying Code...";
     btn.disabled = true;
 
-    const { error } = await supabase.auth.verifyOtp({ 
+    const { error } = await supabaseClient.auth.verifyOtp({ 
         email: email, 
         token: otp, 
         type: 'email' 
@@ -101,7 +102,7 @@ async function verifyOTP(e) {
         alert("Welcome to Nini Nuts!");
         await updateUIBasedOnAuth();
         navigate('shop');
-        loadProducts(); // Reloads products to show "Add to Cart" buttons
+        loadProducts(); 
     }
 }
 
@@ -114,7 +115,7 @@ function resetAuthForm() {
 }
 
 async function logoutUser() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     alert("You have been successfully logged out.");
     await updateUIBasedOnAuth();
     navigate('shop');
@@ -126,11 +127,11 @@ async function logoutUser() {
 // ==========================================
 async function loadProducts(categoryFilter = 'All') {
     const list = document.getElementById('product-list');
-    if(!list) return; // Prevents errors if loaded on admin page
+    if(!list) return; 
 
     list.innerHTML = '<p style="text-align: center; width: 100%;">Loading sweet treats from the database...</p>';
 
-    let query = supabase.from('products').select('*').order('created_at', { ascending: false });
+    let query = supabaseClient.from('products').select('*').order('created_at', { ascending: false });
     if (categoryFilter !== 'All') {
         query = query.eq('category', categoryFilter);
     }
@@ -228,7 +229,7 @@ async function uploadProduct(e) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
     
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseClient.storage
         .from('product-images')
         .upload(fileName, file);
 
@@ -240,12 +241,12 @@ async function uploadProduct(e) {
     }
 
     // B. Get Public URL for the image
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = supabaseClient.storage
         .from('product-images')
         .getPublicUrl(fileName);
 
     // C. Insert Data into Database
-    const { error: dbError } = await supabase.from('products').insert([
+    const { error: dbError } = await supabaseClient.from('products').insert([
         { name: name, category: category, price: parseFloat(price), image_url: publicUrl }
     ]);
 
