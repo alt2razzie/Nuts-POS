@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nini Nuts - Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header style="background-color: #87ceeb;">
+    <div class="logo">ADMIN DASHBOARD</div>
+    <nav><button onclick="logout()">Logout & Exit</button></nav>
+</header>
+
+<div class="container">
+    <form onsubmit="uploadProduct(event)">
+        <h3 style="color: #87ceeb;">Add New Product</h3>
+        <input type="text" id="p-name" placeholder="Product Name" required>
+        <select id="p-category" required>
+            <option value="Nuts">Nuts</option>
+            <option value="Dried Fruits">Dried Fruits</option>
+            <option value="Mixes">Mixes</option>
+        </select>
+        <input type="number" id="p-price" placeholder="Price (₱)" required>
+        <input type="file" id="p-image" accept="image/*" required>
+        <button type="submit" class="btn-primary" style="background:#87ceeb;">Upload to Database</button>
+    </form>
+</div>
+
+<script src="app.js"></script>
+<script>
+    // Guard Clause: Run immediately to secure the page
+    async function checkAdmin() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            alert("Unauthorized access. Redirecting.");
+            window.location.href = 'index.html';
+        }
+    }
+    checkAdmin();
+</script>
+</body>
+</html>
