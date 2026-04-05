@@ -1,69 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nini Nuts - Pastel Edition</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
 <body>
 
+<div class="top-bar">
+    <span id="lang-seller">Seller Centre</span>
+    <span id="lang-help">Help</span>
+    <select id="language-selector" onchange="changeLanguage()">
+        <option value="en">English</option>
+        <option value="tl">Tagalog</option>
+        <option value="ceb">Bisaya</option>
+    </select>
+</div>
+
 <header>
-    <div class="logo">
-        NINI NUTS
-        <div class="tagline">GET NUTTY, STAY HAPPY</div>
+    <div class="logo-container" onclick="navigate('shop')">
+        <img src="YOUR_LOGO_URL_HERE.png" alt="Nini Nuts Logo" onerror="this.outerHTML='<h2>🥜 NINI NUTS</h2>'">
     </div>
-    <nav id="main-nav">
-        <button onclick="navigate('shop')">Shop</button>
-        <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">Cart (₱<span id="nav-cart-total">0</span>)</button>
-        <button id="nav-login-btn" onclick="navigate('auth')">Login</button>
+    
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search treats..." onkeyup="searchProducts()">
+        <button onclick="searchProducts()">🔍</button>
+    </div>
+
+    <div class="header-icons">
+        <button id="nav-login-btn" onclick="navigate('auth')">Login / Sign Up</button>
+        <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">🛒 Cart (<span id="nav-cart-total">0</span>)</button>
         <button id="nav-logout-btn" onclick="logoutUser()" class="hidden">Logout</button>
-        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: #ff69b4; background: white; padding: 5px 15px; border-radius: 15px;">Admin</button>
-    </nav>
+        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: red;">Admin</button>
+    </div>
 </header>
 
 <div class="container">
     
     <div id="shop" class="page">
         <div class="tabs">
-            <button onclick="loadProducts('All')">All Treats</button>
-            <button onclick="loadProducts('Nuts')">Nuts</button>
-            <button onclick="loadProducts('Dried Fruits')">Dried Fruits</button>
-            <button onclick="loadProducts('Mixes')">Mixes</button>
+            <button class="lang-all" onclick="loadProducts('All')">All Treats</button>
+            <button class="lang-nuts" onclick="loadProducts('Nuts')">Nuts</button>
+            <button class="lang-dried" onclick="loadProducts('Dried Fruits')">Dried Fruits</button>
+            <button class="lang-mixes" onclick="loadProducts('Mixes')">Mixes</button>
         </div>
-        <div class="grid" id="product-list">
-            </div>
-    </div>
-
-    <div id="auth" class="page hidden">
-        <div style="text-align: center;">
-            <h2 style="color: #ff69b4;">Welcome to Nini Nuts!</h2>
-            
-            <form id="otp-request-form" onsubmit="requestOTP(event)">
-                <p style="color: #888; font-size: 0.9rem;">Enter your email to log in or create a new account.</p>
-                <input type="email" id="customer-email" placeholder="Email Address" required>
-                <button type="submit" id="btn-request-otp" class="btn-primary">Send Secure Code</button>
-            </form>
-
-            <form id="otp-verify-form" class="hidden" onsubmit="verifyOTP(event)">
-                <p style="color: #2c7a3f; font-weight: bold;">Code sent! Check your email.</p>
-                <input type="text" id="customer-otp" placeholder="6-Digit Code" required pattern="[0-9]{6}" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 3px;">
-                <button type="submit" id="btn-verify-otp" class="btn-primary">Verify & Enter Shop</button>
-                <button type="button" onclick="resetAuthForm()" style="background: none; border: none; color: #ff69b4; margin-top: 1rem; cursor: pointer; text-decoration: underline;">Use a different email</button>
-            </form>
-        </div>
+        <div class="grid" id="product-list"></div>
     </div>
 
     <div id="cart" class="page hidden">
-        <h2 style="color: #ff69b4; text-align: center;">Your Nutty Cart</h2>
-        <div id="cart-items" style="background: white; padding: 1rem; border-radius: 15px; border: 2px solid #ffe4e1; max-width: 600px; margin: 0 auto;"></div>
-        
-        <div style="text-align: right; font-size: 1.5rem; font-weight: bold; color: #ff69b4; max-width: 600px; margin: 1rem auto 0 auto;">
-            Total: ₱<span id="cart-page-total">0</span>
+        <h2 class="lang-cart-title">Your Cart</h2>
+        <div id="cart-items"></div>
+        <h3 style="text-align: right;">Total: ₱<span id="cart-page-total">0</span></h3>
+
+        <div class="checkout-section">
+            <h3 class="lang-checkout">Checkout & Delivery</h3>
+            <label class="lang-payment">Mode of Payment:</label>
+            <select id="payment-mode" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;">
+                <option value="cod">Cash on Delivery (COD)</option>
+                <option value="gcash">Gcash / PayMaya (E-Wallet)</option>
+                <option value="wire">Bank Transfer</option>
+            </select>
+
+            <label class="lang-location">Delivery Location (Mock Map):</label>
+            <div style="width: 100%; height: 200px; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 5px; margin-bottom: 1rem;">
+                📍 Cagayan de Oro City (Map Placeholder)
+            </div>
+
+            <button class="btn-primary lang-place-order" onclick="placeOrder()">Place Order</button>
         </div>
-        <div style="text-align: right; max-width: 600px; margin: 1rem auto;">
-             <button class="btn-primary" style="width: auto;">Proceed to Checkout</button>
+    </div>
+
+    <div id="auth" class="page hidden">
+        <div style="text-align: center; max-width: 400px; margin: auto;">
+            <h2>Login or Sign Up</h2>
+            <form id="otp-request-form" onsubmit="requestOTP(event)">
+                <p>Enter your Phone Number or Email</p>
+                <input type="text" id="customer-contact" placeholder="+63 912 345 6789" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem;">
+                <button type="submit" class="btn-primary">Send OTP</button>
+            </form>
         </div>
     </div>
 
@@ -71,4 +78,3 @@
 
 <script src="app.js"></script>
 </body>
-</html>
