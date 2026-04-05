@@ -1,3 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nini Nuts | Get Nutty, Stay Happy</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body>
 
 <div class="top-bar">
@@ -12,7 +21,7 @@
 
 <header>
     <div class="logo-container" onclick="navigate('shop')">
-        <img src="YOUR_LOGO_URL_HERE.png" alt="Nini Nuts Logo" onerror="this.outerHTML='<h2>🥜 NINI NUTS</h2>'">
+        <img src="https://alt2razzie.github.io/Nuts-POS/logo.png" alt="Nini Nuts" onerror="this.outerHTML='<h2>🥜 NINI NUTS</h2>'">
     </div>
     
     <div class="search-bar">
@@ -43,20 +52,20 @@
     <div id="cart" class="page hidden">
         <h2 class="lang-cart-title">Your Cart</h2>
         <div id="cart-items"></div>
-        <h3 style="text-align: right;">Total: ₱<span id="cart-page-total">0</span></h3>
+        <h3 style="text-align: right; margin-top: 2rem;">Total: ₱<span id="cart-page-total">0</span></h3>
 
         <div class="checkout-section">
             <h3 class="lang-checkout">Checkout & Delivery</h3>
             <label class="lang-payment">Mode of Payment:</label>
-            <select id="payment-mode" style="width: 100%; margin-bottom: 1rem; padding: 0.5rem;">
+            <select id="payment-mode" style="width: 100%; margin-bottom: 1.5rem; padding: 0.8rem; border-radius: 4px; border: 1px solid #ccc;">
                 <option value="cod">Cash on Delivery (COD)</option>
                 <option value="gcash">Gcash / PayMaya (E-Wallet)</option>
                 <option value="wire">Bank Transfer</option>
             </select>
 
-            <label class="lang-location">Delivery Location (Mock Map):</label>
-            <div style="width: 100%; height: 200px; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 5px; margin-bottom: 1rem;">
-                📍 Cagayan de Oro City (Map Placeholder)
+            <label class="lang-location">Delivery Location:</label>
+            <div style="width: 100%; height: 200px; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 5px; margin-bottom: 1.5rem; border: 1px solid #ccc;">
+                📍 Cagayan de Oro City (Mock Map Delivery Area)
             </div>
 
             <button class="btn-primary lang-place-order" onclick="placeOrder()">Place Order</button>
@@ -64,12 +73,19 @@
     </div>
 
     <div id="auth" class="page hidden">
-        <div style="text-align: center; max-width: 400px; margin: auto;">
+        <div style="text-align: center; max-width: 400px; margin: auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #eee;">
             <h2>Login or Sign Up</h2>
+            
             <form id="otp-request-form" onsubmit="requestOTP(event)">
                 <p>Enter your Phone Number or Email</p>
-                <input type="text" id="customer-contact" placeholder="+63 912 345 6789" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem;">
-                <button type="submit" class="btn-primary">Send OTP</button>
+                <input type="text" id="customer-contact" placeholder="+63 912 345 6789 or email@gmail.com" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; text-align: center; font-size: 1.1rem; border: 1px solid #ccc; border-radius: 4px;">
+                <button type="submit" id="btn-send-otp" class="btn-primary">Send Secure Code</button>
+            </form>
+
+            <form id="otp-verify-form" onsubmit="verifyOTP(event)" class="hidden" style="margin-top: 20px;">
+                <p style="color: green; font-weight: bold;">Code sent!</p>
+                <input type="text" id="customer-otp" placeholder="Enter 6-Digit Code" required pattern="\d{6}" maxlength="6" minlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; text-align: center; font-size: 1.5rem; letter-spacing: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <button type="submit" id="btn-verify-otp" class="btn-primary">Verify & Enter Shop</button>
             </form>
         </div>
     </div>
@@ -78,3 +94,4 @@
 
 <script src="app.js"></script>
 </body>
+</html>
