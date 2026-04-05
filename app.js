@@ -1,76 +1,95 @@
-// ==========================================
-// 1. SUPABASE CONFIGURATION (UPDATE THESE!)
-// ==========================================
+
 const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
 const ADMIN_EMAIL = 'macmacgonzaga43@gmail.com'; // <--- Change this to your admin email
-
-// FIX: Renamed from 'supabase' to 'supabaseClient'
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// State Variables
 let currentUser = null;
 let cart = [];
 
-// ==========================================
-// 2. NAVIGATION & UI STATE
-// ==========================================
+// --- TRANSLATIONS ---
+const translations = {
+    en: {
+        seller: "Seller Centre", help: "Help",
+        all: "All Treats", nuts: "Nuts", dried: "Dried Fruits", mixes: "Mixes",
+        cartTitle: "Your Cart", checkout: "Checkout & Delivery",
+        payment: "Mode of Payment:", location: "Delivery Location (Mock Map):", placeOrder: "Place Order"
+    },
+    tl: {
+        seller: "Sentro ng Nagbebenta", help: "Tulong",
+        all: "Lahat ng Pagkain", nuts: "Mani", dried: "Pinatuyong Prutas", mixes: "Pinaghalo",
+        cartTitle: "Iyong Cart", checkout: "Pagbabayad at Pagpapadala",
+        payment: "Paraan ng Pagbabayad:", location: "Lugar ng Pagpapadala (Mock Map):", placeOrder: "Mag-order Na"
+    },
+    ceb: {
+        seller: "Sentro sa Tigbaligya", help: "Tabang",
+        all: "Tanan Pagkaon", nuts: "Mani", dried: "Pina-uga nga Prutas", mixes: "Sagol",
+        cartTitle: "Imong Cart", checkout: "Pagbayad ug Paghatod",
+        payment: "Paagi sa Pagbayad:", location: "Lugar nga Ideliver (Mock Map):", placeOrder: "I-order Na"
+    }
+};
+
+function changeLanguage() {
+    const lang = document.getElementById('language-selector').value;
+    document.getElementById('lang-seller').innerText = translations[lang].seller;
+    document.getElementById('lang-help').innerText = translations[lang].help;
+    document.querySelector('.lang-all').innerText = translations[lang].all;
+    document.querySelector('.lang-nuts').innerText = translations[lang].nuts;
+    document.querySelector('.lang-dried').innerText = translations[lang].dried;
+    document.querySelector('.lang-mixes').innerText = translations[lang].mixes;
+    document.querySelector('.lang-cart-title').innerText = translations[lang].cartTitle;
+    document.querySelector('.lang-checkout').innerText = translations[lang].checkout;
+    document.querySelector('.lang-payment').innerText = translations[lang].payment;
+    document.querySelector('.lang-location').innerText = translations[lang].location;
+    document.querySelector('.lang-place-order').innerText = translations[lang].placeOrder;
+}
+
+// --- NAVIGATION & UI ---
 function navigate(pageId) {
     document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
     document.getElementById(pageId).classList.remove('hidden');
-    window.scrollTo(0, 0);
+    if(pageId === 'cart') updateCartUI();
 }
 
 async function updateUIBasedOnAuth() {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    
+    currentUser = session?.user;
+
     const loginBtn = document.getElementById('nav-login-btn');
-    const logoutBtn = document.getElementById('nav-logout-btn');
     const cartBtn = document.getElementById('nav-cart-btn');
+    const logoutBtn = document.getElementById('nav-logout-btn');
     const adminBtn = document.getElementById('nav-admin-btn');
 
-    if (session) {
-        currentUser = session.user;
-        if(loginBtn) loginBtn.classList.add('hidden');
-        if(logoutBtn) logoutBtn.classList.remove('hidden');
-        if(cartBtn) cartBtn.classList.remove('hidden');
-        
-        if (currentUser.email === ADMIN_EMAIL && adminBtn) {
-            adminBtn.classList.remove('hidden');
-        }
-
-        if(document.getElementById('auth') && !document.getElementById('auth').classList.contains('hidden')) {
-            navigate('shop');
-        }
+    if (currentUser) {
+        loginBtn.classList.add('hidden');
+        cartBtn.classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+        if (currentUser.email === ADMIN_EMAIL) adminBtn.classList.remove('hidden');
     } else {
-        currentUser = null;
-        cart = []; 
-        updateCartUI();
-        if(loginBtn) loginBtn.classList.remove('hidden');
-        if(logoutBtn) logoutBtn.classList.add('hidden');
-        if(cartBtn) cartBtn.classList.add('hidden');
-        if(adminBtn) adminBtn.classList.add('hidden');
+        loginBtn.classList.remove('hidden');
+        cartBtn.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        adminBtn.classList.add('hidden');
     }
 }
 
-// ==========================================
-// 3. AUTHENTICATION (EMAIL OTP)
-// ==========================================
+// --- AUTHENTICATION (Smart Phone & Email) ---
 async function requestOTP(e) {
     e.preventDefault();
-    const email = document.getElementById('customer-email').value;
-    const btn = document.getElementById('btn-request-otp');
-    
-    btn.innerText = "Sending Secure Code...";
+    const contact = document.getElementById('customer-contact').value.trim();
+    const btn = document.getElementById('btn-send-otp');
+    btn.innerText = "Sending...";
     btn.disabled = true;
 
-    const { error } = await supabaseClient.auth.signInWithOtp({ 
-        email: email,
-        options: { shouldCreateUser: true }
-    });
+    const isEmail = contact.includes('@');
+    
+    // Auto-routes to Twilio if it's a number, Gmail if it's an email
+    const { error } = await supabaseClient.auth.signInWithOtp(
+        isEmail ? { email: contact } : { phone: contact }
+    );
 
     if (error) {
-        alert("Error sending code: " + error.message);
+        alert("Error: " + error.message);
         btn.innerText = "Send Secure Code";
         btn.disabled = false;
     } else {
@@ -81,24 +100,27 @@ async function requestOTP(e) {
 
 async function verifyOTP(e) {
     e.preventDefault();
-    
-    // .trim() prevents errors if someone accidentally copies an invisible space
-    const email = document.getElementById('customer-email').value.trim();
+    const contact = document.getElementById('customer-contact').value.trim();
+    const isEmail = contact.includes('@');
     const otp = document.getElementById('customer-otp').value.trim(); 
     const btn = document.getElementById('btn-verify-otp');
     
-    btn.innerText = "Verifying Code...";
+    if (otp.length !== 6 || isNaN(otp)) {
+        alert("Hold up! The secure code must be exactly 6 numbers.");
+        return; 
+    }
+
+    btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    // Supabase v2 uses type: 'email' for ALL 6-digit email codes (both signup and login)
     const { error } = await supabaseClient.auth.verifyOtp({ 
-        email: email, 
+        email: isEmail ? contact : undefined,
+        phone: !isEmail ? contact : undefined,
         token: otp, 
-        type: 'email' 
+        type: isEmail ? 'email' : 'sms' 
     });
 
     if (error) {
-        // This will now show the REAL error (e.g., "Invalid code" or "Expired")
         alert("Error: " + error.message);
         btn.innerText = "Verify & Enter Shop";
         btn.disabled = false;
@@ -110,164 +132,141 @@ async function verifyOTP(e) {
     }
 }
 
-function resetAuthForm() {
-    document.getElementById('otp-verify-form').classList.add('hidden');
-    document.getElementById('otp-request-form').classList.remove('hidden');
-    document.getElementById('btn-request-otp').innerText = "Send Secure Code";
-    document.getElementById('btn-request-otp').disabled = false;
-    document.getElementById('customer-otp').value = "";
-}
-
 async function logoutUser() {
     await supabaseClient.auth.signOut();
-    alert("You have been successfully logged out.");
-    await updateUIBasedOnAuth();
+    cart = []; 
+    document.getElementById('nav-cart-total').innerText = "0";
+    alert("You have been logged out.");
+    updateUIBasedOnAuth();
     navigate('shop');
-    loadProducts(); 
 }
 
-// ==========================================
-// 4. SHOP & DATABASE FETCHING
-// ==========================================
-async function loadProducts(categoryFilter = 'All') {
-    const list = document.getElementById('product-list');
-    if(!list) return; 
-
-    list.innerHTML = '<p style="text-align: center; width: 100%;">Loading sweet treats from the database...</p>';
-
-    let query = supabaseClient.from('products').select('*').order('created_at', { ascending: false });
-    if (categoryFilter !== 'All') {
-        query = query.eq('category', categoryFilter);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-        list.innerHTML = '<p style="color: red; text-align: center; width: 100%;">Failed to load products. Check your database connection.</p>';
-        console.error(error);
-        return;
-    }
-
-    list.innerHTML = '';
-    
-    if(data.length === 0) {
-        list.innerHTML = '<p style="text-align: center; width: 100%;">No products found. Time to upload some treats!</p>';
-        return;
-    }
-
-    data.forEach(p => {
-        const btnHtml = currentUser 
-            ? `<button class="btn-add" onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>`
-            : `<button class="btn-primary" onclick="navigate('auth')">Login to Buy</button>`;
-
-        list.innerHTML += `
-            <div class="card">
-                <img src="${p.image_url}" alt="${p.name}" class="product-img">
-                <h3>${p.name}</h3>
-                <p style="color:#aaa; font-size:0.9rem;">${p.category}</p>
-                <div class="price">₱${p.price.toFixed(2)}</div>
-                ${btnHtml}
-            </div>
-        `;
+// --- SHOP LOGIC ---
+function searchProducts() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const title = card.querySelector('h3').innerText.toLowerCase();
+        if (title.includes(query)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
     });
 }
 
-// ==========================================
-// 5. CART LOGIC
-// ==========================================
-function addToCart(name, price) {
-    cart.push({ name, price });
-    updateCartUI();
-    alert(`${name} added to your cart!`);
+async function loadProducts(category = 'All') {
+    let query = supabaseClient.from('products').select('*');
+    if (category !== 'All') query = query.eq('category', category);
+    
+    const { data: products, error } = await query;
+    const list = document.getElementById('product-list');
+    list.innerHTML = '';
+
+    if (error) {
+        console.error("Error loading products", error);
+        return;
+    }
+
+    products.forEach(p => {
+        const isSoldOut = p.stock <= 0;
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <img src="${p.image_url}" class="product-img">
+            <h3>${p.name}</h3>
+            <p class="price">₱${p.price}</p>
+            ${isSoldOut ? 
+                `<p class="sold-out">SOLD OUT</p>` : 
+                `<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:15px;">
+                    <button class="qty-btn" onclick="adjustTempQty(${p.id}, -1)">-</button>
+                    <span id="temp-qty-${p.id}" style="font-size: 1.2rem; font-weight: bold;">1</span>
+                    <button class="qty-btn" onclick="adjustTempQty(${p.id}, 1, ${p.stock})">+</button>
+                </div>
+                <button class="btn-primary" onclick="addToCart(${p.id}, '${p.name}', ${p.price}, ${p.stock})">Add to Cart</button>`
+            }
+        `;
+        list.appendChild(div);
+    });
+}
+
+function adjustTempQty(id, change, maxStock) {
+    const qtySpan = document.getElementById(`temp-qty-${id}`);
+    let currentQty = parseInt(qtySpan.innerText);
+    let newQty = currentQty + change;
+    
+    if (newQty < 1) newQty = 1;
+    if (newQty > maxStock) {
+        alert("Cannot exceed available stock of " + maxStock);
+        newQty = maxStock;
+    }
+    qtySpan.innerText = newQty;
+}
+
+// --- CART & CHECKOUT LOGIC ---
+function addToCart(id, name, price, maxStock) {
+    if (!currentUser) {
+        alert("Please log in to add items to your cart!");
+        navigate('auth');
+        return;
+    }
+    
+    const selectedQty = parseInt(document.getElementById(`temp-qty-${id}`).innerText);
+    const existingItem = cart.find(item => item.id === id);
+
+    if (existingItem) {
+        if (existingItem.qty + selectedQty > maxStock) {
+            alert("Adding this would exceed available stock!");
+            return;
+        }
+        existingItem.qty += selectedQty;
+    } else {
+        cart.push({ id, name, price, qty: selectedQty });
+    }
+
+    document.getElementById('nav-cart-total').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+    alert(`Added ${selectedQty}x ${name} to cart!`);
 }
 
 function updateCartUI() {
-    const cartItemsDiv = document.getElementById('cart-items');
-    if(!cartItemsDiv) return;
-
+    const cartDiv = document.getElementById('cart-items');
+    cartDiv.innerHTML = '';
     let total = 0;
-    cartItemsDiv.innerHTML = '';
-    
-    if (cart.length === 0) {
-        cartItemsDiv.innerHTML = '<p style="color: #888; text-align: center;">Your cart is feeling a bit empty.</p>';
-    } else {
-        cart.forEach((item, index) => {
-            total += item.price;
-            cartItemsDiv.innerHTML += `
-                <div class="cart-item">
-                    <span>${item.name}</span>
-                    <span>₱${item.price.toFixed(2)} <button onclick="removeFromCart(${index})">X</button></span>
-                </div>
-            `;
-        });
-    }
-    
-    document.getElementById('nav-cart-total').innerText = total.toFixed(2);
-    document.getElementById('cart-page-total').innerText = total.toFixed(2);
+
+    cart.forEach((item, index) => {
+        total += item.price * item.qty;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+            <span><b>${item.name}</b> (x${item.qty})</span>
+            <span>₱${item.price * item.qty}</span>
+            <button onclick="removeFromCart(${index})">Remove</button>
+        `;
+        cartDiv.appendChild(div);
+    });
+
+    document.getElementById('cart-page-total').innerText = total;
 }
 
 function removeFromCart(index) {
     cart.splice(index, 1);
+    document.getElementById('nav-cart-total').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
     updateCartUI();
 }
 
-// ==========================================
-// 6. ADMIN DATABASE UPLOAD
-// ==========================================
-async function uploadProduct(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btn-upload');
-    
-    const name = document.getElementById('p-name').value;
-    const category = document.getElementById('p-category').value;
-    const price = document.getElementById('p-price').value;
-    const fileInput = document.getElementById('p-image');
-    
-    if (fileInput.files.length === 0) return alert("Please select an image.");
-    const file = fileInput.files[0];
-
-    btn.innerText = "Uploading to Cloud...";
-    btn.disabled = true;
-
-    // A. Upload Image to Supabase Storage
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    
-    const { error: uploadError } = await supabaseClient.storage
-        .from('product-images')
-        .upload(fileName, file);
-
-    if (uploadError) {
-        alert("Image upload failed: " + uploadError.message);
-        btn.innerText = "Upload to Database"; 
-        btn.disabled = false; 
+async function placeOrder() {
+    if (cart.length === 0) {
+        alert("Your cart is empty!");
         return;
     }
-
-    // B. Get Public URL for the image
-    const { data: { publicUrl } } = supabaseClient.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
-    // C. Insert Data into Database
-    const { error: dbError } = await supabaseClient.from('products').insert([
-        { name: name, category: category, price: parseFloat(price), image_url: publicUrl }
-    ]);
-
-    if (dbError) {
-        alert("Database error: " + dbError.message);
-    } else {
-        alert("Product added successfully!");
-        e.target.reset(); // Clear the form
-    }
-    
-    btn.innerText = "Upload to Database"; 
-    btn.disabled = false;
+    const mode = document.getElementById('payment-mode').value;
+    alert(`Order placed successfully via ${mode.toUpperCase()}! Thank you for shopping with Nini Nuts.`);
+    cart = [];
+    document.getElementById('nav-cart-total').innerText = "0";
+    navigate('shop');
+    loadProducts(); // Reload to reflect any potential server-side stock changes
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    updateUIBasedOnAuth().then(() => {
-        loadProducts();
-    });
-});
+// Start up
+updateUIBasedOnAuth();
+loadProducts();
