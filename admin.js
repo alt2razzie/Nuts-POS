@@ -2,7 +2,7 @@ const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const UI_PASSCODE = "pastelnuts2026";
+const UI_PASSCODE = "rainyrayns";
 
 function checkPasscode() {
     const guess = prompt("Enter Admin Passcode:");
