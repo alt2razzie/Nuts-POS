@@ -30,6 +30,8 @@
     </div>
 
     <div class="header-icons">
+        <button id="music-toggle-btn" onclick="toggleMusic()" style="color: #8C6A53;">🔇 Vibe</button>
+        
         <button id="nav-login-btn" onclick="navigate('auth')">Login</button>
         <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">Cart (<span id="nav-cart-total">0</span>)</button>
         <button id="nav-logout-btn" onclick="logoutUser()" class="hidden">Logout</button>
@@ -116,6 +118,10 @@
     </div>
 
 </div>
+
+<audio id="bg-music" loop>
+    <source src="cafe-music.mp3" type="audio/mpeg">
+</audio>
 
 <script src="app.js"></script>
 </body>
