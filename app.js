@@ -1,7 +1,9 @@
 
+// --- INITIALIZE SUPABASE ---
 const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
-const ADMIN_EMAIL = 'macmacgonzaga43@gmail.com'; // <--- Change this to your admin email
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60';
+const ADMIN_EMAIL = 'kuyabrill@gmail.com'; 
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
@@ -13,19 +15,19 @@ const translations = {
         seller: "Seller Centre", help: "Help",
         all: "All Treats", nuts: "Nuts", dried: "Dried Fruits", mixes: "Mixes",
         cartTitle: "Your Cart", checkout: "Checkout & Delivery",
-        payment: "Mode of Payment:", location: "Delivery Location (Mock Map):", placeOrder: "Place Order"
+        payment: "Mode of Payment:", location: "Delivery Location:", placeOrder: "Submit Order"
     },
     tl: {
         seller: "Sentro ng Nagbebenta", help: "Tulong",
         all: "Lahat ng Pagkain", nuts: "Mani", dried: "Pinatuyong Prutas", mixes: "Pinaghalo",
         cartTitle: "Iyong Cart", checkout: "Pagbabayad at Pagpapadala",
-        payment: "Paraan ng Pagbabayad:", location: "Lugar ng Pagpapadala (Mock Map):", placeOrder: "Mag-order Na"
+        payment: "Paraan ng Pagbabayad:", location: "Lugar ng Pagpapadala:", placeOrder: "I-submit ang Order"
     },
     ceb: {
         seller: "Sentro sa Tigbaligya", help: "Tabang",
         all: "Tanan Pagkaon", nuts: "Mani", dried: "Pina-uga nga Prutas", mixes: "Sagol",
         cartTitle: "Imong Cart", checkout: "Pagbayad ug Paghatod",
-        payment: "Paagi sa Pagbayad:", location: "Lugar nga Ideliver (Mock Map):", placeOrder: "I-order Na"
+        payment: "Paagi sa Pagbayad:", location: "Lugar nga Ideliver:", placeOrder: "I-submit ang Order"
     }
 };
 
@@ -64,7 +66,7 @@ async function updateUIBasedOnAuth() {
         loginBtn.classList.add('hidden');
         cartBtn.classList.remove('hidden');
         logoutBtn.classList.remove('hidden');
-        if (currentUser.email === ADMIN_EMAIL) adminBtn.classList.remove('hidden');
+        if (currentUser.email === ADMIN_EMAIL || currentUser.phone) adminBtn.classList.remove('hidden');
     } else {
         loginBtn.classList.remove('hidden');
         cartBtn.classList.add('hidden');
@@ -73,7 +75,45 @@ async function updateUIBasedOnAuth() {
     }
 }
 
-// --- AUTHENTICATION (Smart Phone & Email) ---
+// --- THE NUT BREAK ANIMATION ENGINE ---
+document.addEventListener('click', function(e) {
+    createNutCrushEffect(e.pageX, e.pageY);
+});
+
+function createNutCrushEffect(x, y) {
+    const shellColors = ['#D4C4B7', '#8C6A53', '#5C4636', '#3A2618', '#F3EFE6'];
+    const particleCount = 8 + Math.floor(Math.random() * 5);
+
+    for(let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'nut-particle';
+        
+        const size = 4 + Math.random() * 8; 
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.backgroundColor = shellColors[Math.floor(Math.random() * shellColors.length)];
+        
+        document.body.appendChild(particle);
+
+        const angle = Math.random() * Math.PI * 2; 
+        const velocity = 40 + Math.random() * 60;  
+        
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity - 30; 
+        const rot = Math.random() * 360; 
+
+        particle.style.setProperty('--tx', `${tx}px`);
+        particle.style.setProperty('--ty', `${ty}px`);
+        particle.style.setProperty('--rot', `${rot}deg`);
+
+        setTimeout(() => particle.remove(), 600);
+    }
+}
+
+// --- AUTHENTICATION ---
 async function requestOTP(e) {
     e.preventDefault();
     const contact = document.getElementById('customer-contact').value.trim();
@@ -83,7 +123,6 @@ async function requestOTP(e) {
 
     const isEmail = contact.includes('@');
     
-    // Auto-routes to Twilio if it's a number, Gmail if it's an email
     const { error } = await supabaseClient.auth.signInWithOtp(
         isEmail ? { email: contact } : { phone: contact }
     );
@@ -138,12 +177,13 @@ async function logoutUser() {
     document.getElementById('nav-cart-total').innerText = "0";
     alert("You have been logged out.");
     updateUIBasedOnAuth();
-    navigate('shop');
+    navigate('landing');
 }
 
 // --- SHOP LOGIC ---
 function searchProducts() {
     const query = document.getElementById('search-input').value.toLowerCase();
+    navigate('shop');
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         const title = card.querySelector('h3').innerText.toLowerCase();
@@ -264,9 +304,10 @@ async function placeOrder() {
     cart = [];
     document.getElementById('nav-cart-total').innerText = "0";
     navigate('shop');
-    loadProducts(); // Reload to reflect any potential server-side stock changes
+    loadProducts(); 
 }
 
 // Start up
 updateUIBasedOnAuth();
+navigate('landing'); 
 loadProducts();
