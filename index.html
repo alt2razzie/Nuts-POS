@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nini Nuts | Get Nutty, Stay Happy</title>
+    <title>Nini Nuts | Premium Roasted Nuts & Snacks</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -20,28 +20,53 @@
 </div>
 
 <header>
-    <div class="logo-container" onclick="navigate('shop')">
-        <img src="https://alt2razzie.github.io/Nuts-POS/logo.png" alt="Nini Nuts" onerror="this.outerHTML='<h2>🥜 NINI NUTS</h2>'">
+    <div class="logo-container" onclick="navigate('landing')">
+        <h2 style="margin: 0; color: #4A3623; font-size: 2rem;">🥜 NINI NUTS</h2>
     </div>
     
     <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search treats..." onkeyup="searchProducts()">
+        <input type="text" id="search-input" placeholder="Search our fresh treats..." onkeyup="searchProducts()">
         <button onclick="searchProducts()">🔍</button>
     </div>
 
     <div class="header-icons">
-        <button id="nav-login-btn" onclick="navigate('auth')">Login / Sign Up</button>
-        <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">🛒 Cart (<span id="nav-cart-total">0</span>)</button>
+        <button id="nav-login-btn" onclick="navigate('auth')">Login</button>
+        <button id="nav-cart-btn" onclick="navigate('cart')" class="hidden">Cart (<span id="nav-cart-total">0</span>)</button>
         <button id="nav-logout-btn" onclick="logoutUser()" class="hidden">Logout</button>
-        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: red;">Admin</button>
+        <button id="nav-admin-btn" onclick="window.location.href='admin.html'" class="hidden" style="color: #D35400;">Admin</button>
     </div>
 </header>
 
+<div id="landing" class="page">
+    <div class="landing-content">
+        <div class="landing-text">
+            <h1 class="stay-fresh-title">Stay-Fresh.<br>Online. On time.</h1>
+            <p>Craving a healthy snack? We've got you covered! Shop our wide selection of top-quality roasted nuts, vibrant dried fruits, and delicious trail mixes. Freshly packed, perfectly priced, and ready to be delivered right to your door.</p>
+            
+            <button class="btn-primary btn-large" onclick="navigate('shop')">Order fresh today</button>
+            
+            <div class="landing-features">
+                <span>🚚 Free Shipping in CDO</span>
+                <span>🌱 Organic Certified</span>
+                <span>⏱️ Same Day Delivery</span>
+            </div>
+        </div>
+        
+        <div class="landing-visuals">
+            <img src="mangoes.png" class="floating-item img-mango" alt="Mangoes" onerror="this.outerHTML='<div class=\'floating-item img-mango\' style=\'font-size:4rem;\'>🥭</div>'">
+            <img src="strawberries.png" class="floating-item img-strawberry" alt="Strawberries" onerror="this.outerHTML='<div class=\'floating-item img-strawberry\' style=\'font-size:4rem;\'>🍓</div>'">
+            <img src="wooden-tray.png" class="floating-item img-tray" alt="Nut Tray" onerror="this.outerHTML='<div class=\'floating-item img-tray\' style=\'font-size:4rem;\'>🥜</div>'">
+            <img src="spilling-jar.png" class="floating-item img-jars" alt="Nut Jar" onerror="this.outerHTML='<div class=\'floating-item img-jars\' style=\'font-size:4rem;\'>🍯</div>'">
+            <img src="nut-bouquet.png" class="floating-item img-bouquet" alt="Nut Bouquet" onerror="this.outerHTML='<div class=\'floating-item img-bouquet\' style=\'font-size:4rem;\'>🌻</div>'">
+        </div>
+    </div>
+</div>
+
 <div class="container">
     
-    <div id="shop" class="page">
+    <div id="shop" class="page hidden">
         <div class="tabs">
-            <button class="lang-all" onclick="loadProducts('All')">All Treats</button>
+            <button class="lang-all active" onclick="loadProducts('All')">All Treats</button>
             <button class="lang-nuts" onclick="loadProducts('Nuts')">Nuts</button>
             <button class="lang-dried" onclick="loadProducts('Dried Fruits')">Dried Fruits</button>
             <button class="lang-mixes" onclick="loadProducts('Mixes')">Mixes</button>
@@ -50,41 +75,41 @@
     </div>
 
     <div id="cart" class="page hidden">
-        <h2 class="lang-cart-title">Your Cart</h2>
-        <div id="cart-items"></div>
-        <h3 style="text-align: right; margin-top: 2rem;">Total: ₱<span id="cart-page-total">0</span></h3>
+        <h2 class="lang-cart-title" style="font-size: 2.5rem; text-align: center; margin-bottom: 2rem;">Your Cart</h2>
+        <div id="cart-items" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(74,54,35,0.05);"></div>
+        <h3 style="text-align: right; margin-top: 2rem; font-size: 1.8rem;">Total: ₱<span id="cart-page-total">0</span></h3>
 
         <div class="checkout-section">
-            <h3 class="lang-checkout">Checkout & Delivery</h3>
-            <label class="lang-payment">Mode of Payment:</label>
-            <select id="payment-mode" style="width: 100%; margin-bottom: 1.5rem; padding: 0.8rem; border-radius: 4px; border: 1px solid #ccc;">
+            <h2 class="lang-checkout" style="margin-bottom: 1.5rem;">Checkout & Delivery</h2>
+            
+            <label class="lang-payment" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Mode of Payment</label>
+            <select id="payment-mode">
                 <option value="cod">Cash on Delivery (COD)</option>
                 <option value="gcash">Gcash / PayMaya (E-Wallet)</option>
                 <option value="wire">Bank Transfer</option>
             </select>
 
-            <label class="lang-location">Delivery Location:</label>
-            <div style="width: 100%; height: 200px; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 5px; margin-bottom: 1.5rem; border: 1px solid #ccc;">
-                📍 Cagayan de Oro City (Mock Map Delivery Area)
-            </div>
+            <label class="lang-location" style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Delivery Location:</label>
+            <textarea placeholder="123 Anywhere St, Cagayan de Oro City..." rows="3"></textarea>
 
-            <button class="btn-primary lang-place-order" onclick="placeOrder()">Place Order</button>
+            <button class="btn-primary lang-place-order" onclick="placeOrder()" style="margin-top: 1rem;">Submit Order</button>
         </div>
     </div>
 
     <div id="auth" class="page hidden">
-        <div style="text-align: center; max-width: 400px; margin: auto; background: white; padding: 2rem; border-radius: 8px; border: 1px solid #eee;">
-            <h2>Login or Sign Up</h2>
+        <div style="max-width: 500px; margin: auto; background: white; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(74, 54, 35, 0.05);">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">Welcome Back</h2>
             
             <form id="otp-request-form" onsubmit="requestOTP(event)">
-                <p>Enter your Phone Number or Email</p>
-                <input type="text" id="customer-contact" placeholder="+63 912 345 6789 or email@gmail.com" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; text-align: center; font-size: 1.1rem; border: 1px solid #ccc; border-radius: 4px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Your Phone Number or Email</label>
+                <input type="text" id="customer-contact" placeholder="+63 912 345 6789 or email@domain.com" required>
                 <button type="submit" id="btn-send-otp" class="btn-primary">Send Secure Code</button>
             </form>
 
             <form id="otp-verify-form" onsubmit="verifyOTP(event)" class="hidden" style="margin-top: 20px;">
-                <p style="color: green; font-weight: bold;">Code sent!</p>
-                <input type="text" id="customer-otp" placeholder="Enter 6-Digit Code" required pattern="\d{6}" maxlength="6" minlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; text-align: center; font-size: 1.5rem; letter-spacing: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <p style="color: #689F38; font-weight: bold; text-align: center;">Code sent successfully!</p>
+                <label style="font-weight: bold; display: block; margin-bottom: 0.5rem;">Enter 6-Digit Code</label>
+                <input type="text" id="customer-otp" placeholder="123456" required pattern="\d{6}" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" style="text-align: center; font-size: 1.5rem; letter-spacing: 10px;">
                 <button type="submit" id="btn-verify-otp" class="btn-primary">Verify & Enter Shop</button>
             </form>
         </div>
