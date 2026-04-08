@@ -330,3 +330,114 @@ navigate('landing');
 loadProducts();
 navigate('landing'); 
 loadProducts();
+
+// =========================================
+// NINI NUTS AI CONCIERGE (Powered by Groq)
+// =========================================
+
+const GROQ_API_KEY = "gsk_YOUR_GROQ_API_KEY_HERE"; 
+
+// The Brain of your AI. Update this with your exact inventory and prices!
+const SYSTEM_PROMPT = `
+You are the friendly, helpful AI Concierge for a premium boutique store called 'Nini Nuts'. 
+Your tone is warm, inviting, and slightly playful (you can use nut puns occasionally).
+Keep your answers brief and highly readable for a chat window.
+
+Nini Nuts Catalog & Prices:
+- Roasted Almonds: ₱350/jar
+- Cashew Nuts: ₱400/jar
+- Pistachios: ₱450/jar
+- Walnut Halves: ₱420/jar
+- Trail Mix (Almonds, Cashews, Raisins, Dark Choc): ₱380/jar
+- Dried Mangoes: ₱250/pack
+- Dried Strawberries: ₱300/pack
+
+Important Facts:
+- We offer Same Day Delivery in Cagayan de Oro (CDO) via Lalamove/Maxim.
+- Free shipping in CDO for orders over ₱1000.
+- All our nuts are organic certified and freshly roasted in small batches every morning.
+- If asked about ordering, tell them to browse the products on the screen and click 'Add to Cart'.
+`;
+
+let chatHistory = [{ role: "system", content: SYSTEM_PROMPT }];
+
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.classList.toggle('hidden');
+}
+
+function handleChatEnter(e) {
+    if (e.key === 'Enter') sendChatMessage();
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    if (!message) return;
+
+    // 1. Display User Message
+    appendMessage(message, 'user-msg');
+    input.value = '';
+    
+    // Show typing indicator
+    const typingId = appendMessage("Nini is typing...", 'ai-msg');
+
+    // 2. Add to history
+    chatHistory.push({ role: "user", content: message });
+
+    // 3. Call Groq API
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama3-8b-8192", // Fast and capable model for customer service
+                messages: chatHistory,
+                temperature: 0.7,
+                max_tokens: 150 // Keep responses snappy
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.choices && data.choices.length > 0) {
+            const aiResponse = data.choices[0].message.content;
+            
+            // Remove typing indicator and show real response
+            document.getElementById(typingId).remove();
+            appendMessage(aiResponse, 'ai-msg');
+            
+            // Save AI response to history so it remembers the conversation
+            chatHistory.push({ role: "assistant", content: aiResponse });
+        } else {
+            throw new Error("No response from Groq");
+        }
+
+    } catch (error) {
+        console.error("Groq API Error:", error);
+        document.getElementById(typingId).remove();
+        appendMessage("Oops! My servers got a little roasted. Please try asking again in a moment.", 'ai-msg');
+        // Remove the failed user message from history so it doesn't break future context
+        chatHistory.pop(); 
+    }
+}
+
+function appendMessage(text, className) {
+    const chatContainer = document.getElementById('chat-messages');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${className}`;
+    msgDiv.innerText = text;
+    
+    // Generate a unique ID so we can easily remove it (used for the typing indicator)
+    const id = 'msg-' + Date.now();
+    msgDiv.id = id;
+    
+    chatContainer.appendChild(msgDiv);
+    
+    // Auto-scroll to bottom
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    return id;
+}
