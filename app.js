@@ -335,7 +335,7 @@ loadProducts();
 // NINI NUTS AI CONCIERGE (Powered by Groq)
 // =========================================
 
-const GROQ_API_KEY = "gsk_YOUR_GROQ_API_KEY_HERE"; 
+const GROQ_API_KEY = "gsk_z1sV9WW0zUfw7ZN8EjeOWGdyb3FY3G0XP2atLpjre7XlHpfywWHms"; 
 
 // The Brain of your AI. Update this with your exact inventory and prices!
 const SYSTEM_PROMPT = `
