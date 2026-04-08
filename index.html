@@ -123,6 +123,22 @@
     <source src="cafe-music.mp3" type="audio/mpeg">
 </audio>
 
+<div id="ai-chat-widget">
+    <div id="chat-window" class="hidden">
+        <div class="chat-header">
+            <span>🥜 Nini's Assistant</span>
+            <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✖</button>
+        </div>
+        <div id="chat-messages">
+            <div class="message ai-msg">Hello! I'm the Nini Nuts concierge. Ask me about our fresh roasts, prices, or health benefits!</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type your question..." onkeypress="handleChatEnter(event)">
+            <button onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+    <button id="chat-bubble" onclick="toggleChat()">💬 Ask AI</button>
+</div>
 <script src="app.js"></script>
 </body>
 </html>
