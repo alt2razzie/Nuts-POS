@@ -338,3 +338,92 @@ input:focus, select:focus, textarea:focus { border-color: #4A3623; }
     background: #D35400; 
     color: white; 
 }
+
+/* =========================================
+   MOBILE RESPONSIVENESS (Smartphones & Tablets)
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* 1. Stack the Header Neatly */
+    header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    .search-bar {
+        margin: 0;
+        width: 100%;
+    }
+    
+    .header-icons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        width: 100%;
+    }
+    
+    .header-icons button {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    /* 2. Reorganize the Landing Page */
+    #landing {
+        padding: 2rem 1rem;
+    }
+
+    .landing-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .stay-fresh-title {
+        font-size: 2.8rem; /* Shrink massive title */
+    }
+
+    .landing-features {
+        justify-content: center;
+        flex-wrap: wrap; /* Let features wrap to next line if needed */
+    }
+
+    /* 3. Shrink & Reposition the Floating Nuts */
+    .landing-visuals {
+        height: 350px; /* Take up less vertical space */
+        width: 100%;
+        overflow: hidden; /* Prevent horizontal scrolling */
+    }
+
+    .img-mango { top: 5%; left: -5%; width: 140px; }
+    .img-jars { top: -5%; right: -5%; width: 180px; }
+    .img-strawberry { top: 35%; left: 35%; width: 120px; }
+    .img-tray { bottom: 0%; left: -10%; width: 260px; }
+    .img-bouquet { bottom: 5%; right: -10%; width: 180px; }
+
+    /* 4. Adjust Shop Tabs & Grid */
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tabs button {
+        flex: 1 1 40%; /* Make tabs act like a 2x2 grid on phones */
+        font-size: 1rem;
+        padding: 0.6rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    /* 5. Squeeze the Forms */
+    .checkout-section, #auth > div {
+        padding: 1.5rem;
+    }
+    
+    #customer-otp {
+        letter-spacing: 5px; /* Squeeze the OTP text slightly */
+    }
+}
