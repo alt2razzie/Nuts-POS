@@ -1,4 +1,3 @@
-
 // --- INITIALIZE SUPABASE ---
 const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60';
@@ -19,7 +18,7 @@ const translations = {
     },
     tl: {
         seller: "Sentro ng Nagbebenta", help: "Tulong",
-        all: "Lahat ng Pagkain", nuts: "Mani", dried: "Pinatuyong Prutas", mixes: "Pinaghalo",
+        all: "Lahat ng Pagkain", nuts: "Mani", Pinatuyong: "Pinatuyong Prutas", mixes: "Pinaghalo",
         cartTitle: "Iyong Cart", checkout: "Pagbabayad at Pagpapadala",
         payment: "Paraan ng Pagbabayad:", location: "Lugar ng Pagpapadala:", placeOrder: "I-submit ang Order"
     },
@@ -75,8 +74,26 @@ async function updateUIBasedOnAuth() {
     }
 }
 
+// --- MUSIC TOGGLE LOGIC ---
+function toggleMusic() {
+    const music = document.getElementById('bg-music');
+    const btn = document.getElementById('music-toggle-btn');
+    
+    if (music.paused) {
+        music.play();
+        btn.innerText = "🔊 Vibe";
+        btn.style.color = "#D35400"; // Makes it pop when active
+    } else {
+        music.pause();
+        btn.innerText = "🔇 Vibe";
+        btn.style.color = "#8C6A53"; // Returns to normal color
+    }
+}
+
 // --- THE NUT BREAK ANIMATION ENGINE ---
 document.addEventListener('click', function(e) {
+    // Prevent the animation from firing if they click the music button
+    if(e.target.id === 'music-toggle-btn') return; 
     createNutCrushEffect(e.pageX, e.pageY);
 });
 
@@ -309,5 +326,7 @@ async function placeOrder() {
 
 // Start up
 updateUIBasedOnAuth();
+navigate('landing'); 
+loadProducts();
 navigate('landing'); 
 loadProducts();
