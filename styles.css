@@ -80,11 +80,12 @@ header {
     filter: drop-shadow(0 20px 15px rgba(74, 54, 35, 0.15));
 }
 
-.img-mango { top: 5%; left: 15%; width: 150px; animation-delay: 0s; }
-.img-strawberry { top: 40%; left: 35%; width: 120px; animation-delay: 1.2s; z-index: 2; }
-.img-tray { bottom: 5%; left: 5%; width: 280px; animation-delay: 2.5s; }
-.img-jars { top: -5%; right: 10%; width: 200px; animation-delay: 0.8s; }
-.img-bouquet { bottom: 10%; right: 5%; width: 180px; animation-delay: 1.7s; }
+/* Update these specific lines in your styles.css */
+.img-mango { top: 5%; left: 15%; width: 190px; animation-delay: 0s; }
+.img-strawberry { top: 40%; left: 35%; width: 150px; animation-delay: 1.2s; z-index: 2; }
+.img-tray { bottom: 5%; left: 5%; width: 340px; animation-delay: 2.5s; }
+.img-jars { top: -5%; right: 10%; width: 250px; animation-delay: 0.8s; }
+.img-bouquet { bottom: 10%; right: 5%; width: 220px; animation-delay: 1.7s; }
 
 @keyframes floatOrganic {
     0% { transform: translateY(0px) rotate(0deg); }
