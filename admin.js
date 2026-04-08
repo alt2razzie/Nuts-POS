@@ -1,8 +1,9 @@
+
 const SUPABASE_URL = 'https://movptqnjygxpkwbuhomc.supabase.co'; // <--- Change this
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vdnB0cW5qeWd4cGt3YnVob21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjE4MjIsImV4cCI6MjA5MDg5NzgyMn0.Wu1SV1NawqOummmafdhPEWAGyz20Qzn65_UGJWHjb60'; // <--- Change this
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const UI_PASSCODE = "rainyrayns";
+const UI_PASSCODE = "pastelnuts2026";
 
 function checkPasscode() {
     const guess = prompt("Enter Admin Passcode:");
@@ -28,7 +29,6 @@ async function addProduct(e) {
     const stock = document.getElementById('product-stock').value;
     const file = document.getElementById('product-image').files[0];
 
-    // 1. Upload Image to Storage Bucket
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const { error: uploadError } = await supabaseClient.storage
@@ -42,12 +42,10 @@ async function addProduct(e) {
         return;
     }
 
-    // 2. Get the public URL for the image
     const { data: { publicUrl } } = supabaseClient.storage
         .from('product-images')
         .getPublicUrl(fileName);
 
-    // 3. Save Product info and Stock to Database
     const { error: dbError } = await supabaseClient
         .from('products')
         .insert([{ 
@@ -87,11 +85,11 @@ async function loadAdminProducts() {
             <div style="display: flex; align-items: center;">
                 <img src="${p.image_url}">
                 <div>
-                    <strong style="display:block; margin-bottom: 5px;">${p.name}</strong>
-                    <span style="color: #bbb;">₱${p.price} | Stock: ${p.stock}</span>
+                    <strong style="display:block; margin-bottom: 5px; font-size: 1.2rem;">${p.name}</strong>
+                    <span style="color: #8C6A53; font-weight: 600;">₱${p.price} | Stock: ${p.stock}</span>
                 </div>
             </div>
-            <button onclick="deleteProduct(${p.id})" style="width: auto; background: #e74c3c; padding: 10px 20px; margin: 0;">Delete</button>
+            <button onclick="deleteProduct(${p.id})" class="btn-delete">Remove</button>
         `;
         list.appendChild(div);
     });
@@ -109,5 +107,4 @@ async function deleteProduct(id) {
     }
 }
 
-// Trigger passcode check on load
 checkPasscode();
